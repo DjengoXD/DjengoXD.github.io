@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ilham</title>
+    <style>
+        
+        
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <h1>{{ judul }}</h1>
+        <p v-if="fruits.length > 1">aku punya {{ fruits.length }} jenis buah: </p>
+        <p v-else>aku belum punya buah:(</p>
+
+        <form @submit.prevent="tambahItem">
+            <input v-model="inputItem" placeholder="tambah nama buah">
+            <button>Tambah</button>
+        </form>
+        <table width="40%" border="1">
+            <thead>
+                <tr>
+                    <th>no.</th>
+                    <th>nama buah</th>
+                    <th>action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(buah,i) in fruits">
+                    <th>{{i}}</th>
+                    <th>{{buah}}</th>
+                    <td><button @click="hapusitem(i)">hapus</button></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        
+        <button><a onclick="return konfirmasi()" href="#">Hapus</a></button>
+
+
+       
+    </div>
+    <script type="text/javascript" language="JavaScript">
+        function konfirmasi()
+        {
+        tanya = confirm("mau di hapus ?");
+        if (tanya == true) return true;
+        else return false;
+        }</script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script>
+    var app = new Vue ({
+        el: '#app',
+        data() {
+            return {
+            judul: 'Buah-Buahan',
+            fruits: [
+                'apel',
+                'markisa',
+                'cangkudu',
+                'melon',
+                'semangka',
+            ],
+            inputItem:'',
+        }
+    },
+    methods: {
+        tambahItem() {
+            if (this.inputItem != " ")
+            
+            this.fruits.push (this.inputItem)
+            this.inputItem=''
+           
+        },
+        hapusitem(i) {
+            this.fruits.splice(i,1)
+        }
+        
+    
+    }
+
+})
+</script>
+</body>
+</html>
