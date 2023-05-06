@@ -1,89 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ilham</title>
-    <style>
-        
-        
-    </style>
+	<title>Jadwal Proses Round-Robin</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+	<div class="container">
+		<h2>Jadwal Proses Round-Robin</h2>
+		<form id="myForm">
+			<div class="form-group">
+				<label for="processes">Masukkan daftar proses:</label>
+				<input type="text" class="form-control" id="processes" placeholder="Contoh: P1, P2, P3">
+			</div>
+			<div class="form-group">
+				<label for="arrivalTimes">Masukkan waktu tiba:</label>
+				<input type="text" class="form-control" id="arrivalTimes" placeholder="Contoh: 0, 2, 4">
+			</div>
+			<div class="form-group">
+				<label for="cpuTimes">Masukkan waktu CPU:</label>
+				<input type="text" class="form-control" id="cpuTimes" placeholder="Contoh: 6, 4, 2">
+			</div>
+			<button type="button" class="btn btn-primary" onclick="generateSchedule()">Jadwal</button>
+		</form>
+		<br>
+		<table class="table table-striped" id="scheduleTable">
+			<thead>
+				<tr>
+					<th>Proses</th>
+					<th>Waktu Tiba</th>
+					<th>Waktu CPU</th>
+					<th>Waktu Selesai</th>
+					<th>Turnaround Time</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+		<canvas id="chart"></canvas>
+	</div>
 
-    <div id="app">
-        <h1>{{ judul }}</h1>
-        <p v-if="fruits.length > 1">aku punya {{ fruits.length }} jenis buah: </p>
-        <p v-else>aku belum punya buah:(</p>
+	<script>
+		function generateSchedule() {
+			var processes = $('#processes').val().split(',').map(function(item) {
+				return item.trim();
+			});
+			var arrivalTimes = $('#arrivalTimes').val().split(',').map(function(item) {
+				return parseInt(item.trim());
+			});
+			var cpuTimes = $('#cpuTimes').val().split(',').map(function(item) {
+				return parseInt(item.trim());
+			});
+			var time = 0;
+			var remainingTime = cpuTimes.slice();
+			var finished = false;
+			var scheduleTable = $('#scheduleTable tbody');
+			scheduleTable.empty();
 
-        <form @submit.prevent="tambahItem">
-            <input v-model="inputItem" placeholder="tambah nama buah">
-            <button>Tambah</button>
-        </form>
-        <table width="40%" border="1">
-            <thead>
-                <tr>
-                    <th>no.</th>
-                    <th>nama buah</th>
-                    <th>action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(buah,i) in fruits">
-                    <th>{{i}}</th>
-                    <th>{{buah}}</th>
-                    <td><button @click="hapusitem(i)">hapus</button></td>
-                </tr>
-            </tbody>
-        </table>
-        
-        
-        <button><a onclick="return konfirmasi()" href="#">Hapus</a></button>
+			while (!finished) {
+				finished = true;
+				for (var i = 0; i < processes.length; i++) {
+					if (remainingTime[i] > 0) {
+						finished = false;
+						var executeTime = remainingTime[i];
+						remainingTime[i] -= executeTime;
+						time += executeTime;
+						var turnaroundTime = time - arrivalTimes[i];
+						var row = '<tr><td>' + processes[i] + '</				</td><td>' + arrivalTimes[i] + '</td><td>' + cpuTimes[i] + '</td><td>' + time + '</td><td>' + turnaroundTime + '</td></tr>';
+						scheduleTable.append(row);
+					}
+					if (remainingTime[i] > 0) {
+						arrivalTimes.push(time);
+						processes.push(processes[i]);
+						cpuTimes.push(remainingTime[i]);
+						remainingTime.push(cpuTimes[cpuTimes.length - 1]);
+					}
+				}
+			}
 
-
-       
-    </div>
-    <script type="text/javascript" language="JavaScript">
-        function konfirmasi()
-        {
-        tanya = confirm("mau di hapus ?");
-        if (tanya == true) return true;
-        else return false;
-        }</script>
-<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-<script>
-    var app = new Vue ({
-        el: '#app',
-        data() {
-            return {
-            judul: 'Buah-Buahan',
-            fruits: [
-                'apel',
-                'markisa',
-                'cangkudu',
-                'melon',
-                'semangka',
-            ],
-            inputItem:'',
-        }
-    },
-    methods: {
-        tambahItem() {
-            if (this.inputItem != " ")
-            
-            this.fruits.push (this.inputItem)
-            this.inputItem=''
-           
-        },
-        hapusitem(i) {
-            this.fruits.splice(i,1)
-        }
-        
-    
-    }
-
-})
-</script>
+			// Create a chart
+			var ctx = document.getElementById('chart').getContext('2d');
+			var chart = new Chart(ctx, {
+				type: 'bar',
+				data: {
+					labels: processes,
+					datasets: [{
+						label: 'Turnaround Time',
+						data: arrivalTimes.map((arrivalTime, index) => time - arrivalTime),
+						backgroundColor: 'rgba(75, 192, 192, 0.6)',
+						borderColor: 'rgba(75, 192, 192, 1)',
+						borderWidth: 1
+					}]
+				},
+				options: {
+					scales: {
+						y: {
+							beginAtZero: true,
+							title: {
+								display: true,
+								text: 'Turnaround Time'
+							}
+						},
+						x: {
+							title: {
+								display: true,
+								text: 'Proses'
+							}
+						}
+					}
+				}
+			});
+		}
+	</script>
 </body>
 </html>
