@@ -1,175 +1,172 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Jadwal Proses Round-Robin</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <head>
+    <meta charset="UTF-8">
+    <title>Penjadwalan Round Robin</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
-        body {
-            background-color: #a5c0dc;
-        }
+      body {
+        padding: 2rem;
+      }
 
-        .container {
-            margin-top: 50px;
-            margin-bottom: 50px;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            background-color: #ffe1e1;
-        }
+      h1 {
+        margin-bottom: 2rem;
+      }
 
-        body {
-            background-color: #e0efff;
-        }
+      form {
+        margin-bottom: 2rem;
+      }
 
-        .container {
-            margin-top: 50px;
-            margin-bottom: 50px;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(210, 83, 83, 0.1);
-            background-color: #94d0fc;
-        }
+      .form-group {
+        margin-bottom: 1rem;
+      }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+      label {
+        font-weight: bold;
+      }
 
-        .btn-primary {
-            background-color: #61a6f0;
-            border-color: #ffffff;
-        }
+      .btn-primary {
+        margin-top: 1rem;
+      }
 
-        .btn-primary:hover {
-            background-color: #24d900;
-            border-color: #18cc00;
-        }
+      #output {
+        margin-top: 2rem;
+      }
 
-        .table {
-            margin-top: 30px;
-        }
+      table {
+        margin-top: 1rem;
+      }
 
-        .table thead th {
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-
-        .text-center {
-            text-align: center;
-        }
+      th, td {
+        text-align: center;
+      }
     </style>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h2 class="text-center">Jadwal Proses Round-Robin</h2>
-        <form id="myForm">
-            <div class="form-group">
-                <label for="processes">Masukkan daftar proses:</label>
-                <input type="text" class="form-control" id="processes" placeholder="Contoh: P1, P2, P3">
-            </div>
-            <div class="form-group">
-                <label for="arrivalTimes">Masukkan waktu tiba:</label>
-                <input type="text" class="form-control" id="arrivalTimes" placeholder="Contoh: 0, 2, 4">
-            </div>
-            <div class="form-group">
-                <label for="cpuTimes">Masukkan waktu CPU:</label>
-                <input type="text" class="form-control" id="cpuTimes" placeholder="Contoh: 6, 4, 2">
-                <small id="cpuTimesHelp" class="form-text text-muted">Masukkan waktu CPU dalam satuan waktu (ms).</small>
-            </div>
-            <div class="form-group">
-                <label for="timeSlice">Masukkan context switch:</label>
-                <input type="number" class="form-control" id="timeSlice" placeholder="Contoh: 1">
-                <small id="timeSliceHelp" class="form-text text-muted">Masukkan context switch dalam satuan waktu (ms).</small>
-            </div>
-            <button type="button" class="btn btn-primary btn-block" onclick="generateSchedule()">Jadwal</button>
-        </form>
-        <br>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Process ID</th>
-                    <th>Arrival Time</th>
-                    <th>Burst Time</th>
-                    <th>Completion Time</th>
-                    <th>Turnaround Time</th>
-                    <th>Waiting Time</th>
-                    <th>Context Switches</th>
-                </tr>
-            </thead>
-            <tbody id="scheduleTableBody">
-            </tbody>
-        </table>
-        <p id="averageTurnaroundTime" class="text-center"></p>
-    </div>
-    <footer class="footer fixed-bottom">
-        <div class="container">
-            <p class="text-center">&copy; 2023 Ilham Nurhuda. All rights reserved.</p>
+      <h1>Penjadwalan Round Robin</h1>
+      <form id="roundRobinForm">
+       <div class="form-group">
+          <label for="processes">Proses (dipisahkan dengan koma)</label>
+          <input type="text" class="form-control" id="processes" name="processes" required>
         </div>
-    </footer>
-    <script>
-        function generateSchedule() {
-            var processes = $('#processes').val().split(',').map(function(item) {
-                return item.trim();
-            });
-            var arrivalTimes = $('#arrivalTimes').val().split(',').map(function(item) {
-                return parseInt(item.trim());
-            });
-            var cpuTimes = $('#cpuTimes').val().split(',').map(function(item) {
-                return parseInt(item.trim());
-            });
-            var contextSwitch = parseInt($('#timeSlice').val().trim());
-            var time = 0;
-            var remainingTime = cpuTimes.slice();
-            var turnaroundTimes = [];
-            var waitingTimes = [];
-            var contextSwitches = [];
+        <div class="form-group">
+          <label for="burstTimes">Waktu Burst (dipisahkan dengan koma)</label>
+          <input type="text" class="form-control" id="burstTimes" name="burstTimes" required>
+        </div>
+        <div class="form-group">
+          <label for="quantum">Quantum</label>
+          <input type="number" class="form-control" id="quantum" name="quantum" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Hitung</button>
+      </form>
+      <div id="output"></div>
+    </div>
+    <script >
+        function roundRobin(processes, burstTimes, quantum) {
+  const n = processes.length;
+  const remainingBurstTimes = [...burstTimes];
+  const waitingTimes = new Array(n).fill(0);
+  const turnaroundTimes = new Array(n).fill(0);
+  const startTimes = new Array(n).fill(0);
+  const endTimes = new Array(n).fill(0);
+  const executionOrder = [];
 
-            var finished = false;
-            var scheduleTableBody = $('#scheduleTableBody');
-            scheduleTableBody.empty();
+  let time = 0;
+  let done = false;
 
-            while (!finished) {
-                finished = true;
-                for (var i = 0; i < processes.length; i++) {
-                    if (remainingTime[i] > 0) {
-                        finished = false;
-                        var executeTime = remainingTime[i] > contextSwitch ? contextSwitch : remainingTime[i];
-                        remainingTime[i] -= executeTime;
-                        time += executeTime;
-                        var turnaroundTime = time - arrivalTimes[i];
-                        var waitingTime = turnaroundTime - cpuTimes[i];
-                        var row = $('<tr>');
-                        row.append($('<td>').text(processes[i]));
-                        row.append($('<td>').text(arrivalTimes[i]));
-                        row.append($('<td>').text(cpuTimes[i]));
-                        row.append($('<td>').text(time));
-                        row.append($('<td>').text(turnaroundTime));
-                        row.append($('<td>').text(waitingTime));
-                        row.append($('<td>').text(Math.floor(turnaroundTime / contextSwitch)));
-                        scheduleTableBody.append(row);
-                        turnaroundTimes.push(turnaroundTime);
-                        waitingTimes.push(waitingTime);
-                        contextSwitches.push(Math.floor(turnaroundTime / contextSwitch));
-                    }
-                }
-            }
+  while (!done) {
+    done = true;
 
-            var averageTurnaroundTime = turnaroundTimes.reduce(function(sum, value) {
-                return sum + value;
-            }, 0) / turnaroundTimes.length;
-            $('#averageTurnaroundTime').text('Average Turnaround Time: ' + averageTurnaroundTime.toFixed(2));
+    for (let i = 0; i < n; i++) {
+      if (remainingBurstTimes[i] > 0) {
+        done = false;
+
+        const currentQuantum = Math.min(quantum, remainingBurstTimes[i]);
+        time += currentQuantum;
+        remainingBurstTimes[i] -= currentQuantum;
+        executionOrder.push(processes[i]);
+
+        if (startTimes[i] === 0) {
+          startTimes[i] = time - currentQuantum;
         }
 
-        $(document).ready(function() {
-            $('#myForm').submit(function(e) {
-                e.preventDefault();
-                generateSchedule();
-            });
-        });
+        if (remainingBurstTimes[i] === 0) {
+          endTimes[i] = time;
+          waitingTimes[i] = time - burstTimes[i] - startTimes[i];
+          turnaroundTimes[i] = time - startTimes[i];
+        }
+      }
+    }
+  }
+
+  return { executionOrder, waitingTimes, turnaroundTimes, startTimes, endTimes };
+}
+
+function validateInput(processes, burstTimes, quantum) {
+  if (processes.length !== burstTimes.length) {
+    throw new Error("Jumlah proses dan waktu burst tidak sama");
+  }
+
+  if (quantum <= 0) {
+    throw new Error("Quantum harus lebih besar dari 0");
+  }
+
+  for (let i = 0; i < burstTimes.length; i++) {
+    if (burstTimes[i] <= 0) {
+      throw new Error("Waktu burst harus lebih besar dari 0");
+    }
+  }
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+
+  const processes = event.target.elements.processes.value.split(",");
+  const burstTimes = event.target.elements.burstTimes.value.split(",").map(Number);
+  const quantum = Number(event.target.elements.quantum.value);
+
+  try {
+    validateInput(processes, burstTimes, quantum);
+
+    const { executionOrder, waitingTimes, turnaroundTimes, startTimes, endTimes } = roundRobin(processes, burstTimes, quantum);
+const outputTable = `
+      <h2>Hasil Penjadwalan</h2>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Proses</th>
+            <th scope="col">Waktu Burst</th>
+            <th scope="col">Waktu Tunggu</th>
+            <th scope="col">Waktu Turnaround</th>
+            <th="col">Waktu Mulai</th>
+            <th scope="col">Waktu Selesai</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${processes.map((process, i) => `
+            <tr>
+              <td>${process}</td>
+              <td>${burstTimes[i]}</td>
+              <td>${waitingTimes[i]}</td>
+              <td>${turnaroundTimes[i]}</td>
+              <td>${startTimes[i]}</td>
+              <td>${endTimes[i]}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+      <h3>Urutan Eksekusi: ${executionOrder.join(" → ")}</h3>
+    `;
+
+    document.getElementById("output").innerHTML = outputTable;
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+document.getElementById("roundRobinForm").addEventListener("submit", handleFormSubmit);
+
     </script>
-</body>
+  </body>
 </html>
